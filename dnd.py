@@ -11,10 +11,10 @@
 ## modify, merge, publish, distribute, sublicense, and/or sell copies
 ## of the Software, and to permit persons to whom the Software is
 ## furnished to do so, subject to the following conditions:
-## 
+##
 ## The above copyright notice and this permission notice shall be
 ## included in all copies or substantial portions of the Software.
-## 
+##
 ## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ## EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 ## MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -37,12 +37,13 @@ nf_extras = "- ._\(\)&\+\*\"'"
 name_query_re = re.compile(r"^([A-Za-z0-9]|[%s])+$" % nf_extras)
 
 # A regex matching a legal UID query
-uid_query_re  = re.compile(r'#\d+$')
+uid_query_re = re.compile(r'#\d+$')
 
 # A regex matching a legal DCTSNUM field query (Dartmouth only)
 dcts_query_re = re.compile(r'\*(?:hd)?\d{5}[A-Z]$', re.IGNORECASE)
 
 # {{ check_query_key(q)
+
 
 def check_query_key(q):
     """Check whether the given query key q is valid as a DND query.
@@ -52,9 +53,11 @@ def check_query_key(q):
            uid_query_re.match(q) is not None  or \
            dcts_query_re.match(q) is not None
 
+
 # }}
 
 # {{ encrypt_challenge(rnd, key)
+
 
 def encrypt_challenge(rnd, key):
     """Encrypt a random challenge from the DND using the user's key.
@@ -66,19 +69,22 @@ def encrypt_challenge(rnd, key):
     may be at most DES.key_size in length, i.e., 8 characters. 
     """
     rnd = decode_octal(rnd)
-    
+
     if len(key) < DES.key_size:
         pad = chr(0) * (DES.key_size - len(key))
         key += pad
-    
+
     dkey = DES.new(key, DES.MODE_ECB)
-    result = dkey.encrypt(rnd); del(dkey)
-    
+    result = dkey.encrypt(rnd)
+    del (dkey)
+
     return encode_octal(result)
+
 
 # }}
 
 # {{ encrypt_change(old, new)
+
 
 def encrypt_change(old, new):
     """Encrypt old and new passwords for a DND change password
@@ -93,22 +99,26 @@ def encrypt_change(old, new):
     if len(old) < DES.key_size:
         pad = chr(0) * (DES.key_size - len(old))
         old += pad
-    
+
     if len(new) < DES.key_size:
         pad = chr(0) * (DES.key_size - len(new))
         new += pad
-    
+
     okey = DES.new(old, DES.MODE_ECB)
     nkey = DES.new(new, DES.MODE_ECB)
-    
-    old_w_new = nkey.encrypt(old); del(nkey)
-    new_w_old = okey.encrypt(new); del(okey)
-    
+
+    old_w_new = nkey.encrypt(old)
+    del (nkey)
+    new_w_old = okey.encrypt(new)
+    del (okey)
+
     return (encode_octal(old_w_new), encode_octal(new_w_old))
+
 
 # }}
 
 # {{ encode_octal(s)
+
 
 def encode_octal(s):
     """Encode the characters of an ASCII string as octal digits.  Each
@@ -117,9 +127,11 @@ def encode_octal(s):
     """
     return ''.join("%03o" % ord(v) for v in s)
 
+
 # }}
 
 # {{ decode_octal(s)
+
 
 def decode_octal(s):
     """Decode a sequence of octal digits into a string.  Each block of
@@ -129,14 +141,15 @@ def decode_octal(s):
     """
     while len(s) % 3 <> 0:
         s = '0' + s
-    
-    return ''.join(chr(int(x, 8))
-                   for x in (s[x : x + 3]
-                             for x in xrange(0, len(s), 3)))
+
+    return ''.join(
+        chr(int(x, 8)) for x in (s[x:x + 3] for x in xrange(0, len(s), 3)))
+
 
 # }}
 
 # {{ enquote_string(s)
+
 
 def enquote_string(s):
     """Enquotes a value according to the DND protocol rules.  All
@@ -145,9 +158,11 @@ def enquote_string(s):
     """
     return '"' + s.replace('"', '""') + '"'
 
+
 # }}
 
 # {{ dequote_string(s)
+
 
 def dequote_string(s):
     """Removes quotation marks from a string according to the DND
@@ -160,14 +175,16 @@ def dequote_string(s):
         s = s[1:]
     if s.endswith('"'):
         s = s[:-1]
-    
+
     return s.replace('""', '"')
+
 
 # }}
 
 # {{ lookup(...)
 
-def lookup(query, fields = (), **config):
+
+def lookup(query, fields=(), **config):
     """This is a wrapper function that creates a DNDSession object and
     uses it to issue the specified query.
 
@@ -183,11 +200,13 @@ def lookup(query, fields = (), **config):
     finally:
         d.close()
 
+
 # }}
 
 # {{ lookup_unique(...)
 
-def lookup_unique(query, fields = (), **config):
+
+def lookup_unique(query, fields=(), **config):
     """This is a wrapper function that creates a DNDSession object and
     uses it to issue the specified query.
 
@@ -203,37 +222,45 @@ def lookup_unique(query, fields = (), **config):
     finally:
         d.close()
 
+
 # }}
 
 # {{ class DNDError and subclasses
 
-class DNDError ( Exception ):
+
+class DNDError(Exception):
     """The root class for DND errors."""
 
-class DNDProtocolError (DNDError):
+
+class DNDProtocolError(DNDError):
     """An exception representing protocol errors encountered during 
     interaction with a DND server.  The `key' field gives the numeric
     error code, the `value' field gives the descriptive text returned
     by the server.
     """
+
     def __init__(self, key, value=''):
         self.key = key
         self.value = value
-    
+
     def __str__(self):
-        return `self.value`
+        return ` self.value `
 
-class DNDLostConnection (DNDError):
+
+class DNDLostConnection(DNDError):
     pass
 
-class DNDNotConnected (DNDError):
+
+class DNDNotConnected(DNDError):
     pass
+
 
 # }}
 
 # {{ class DNDField
 
-class DNDField (object):
+
+class DNDField(object):
     """Represents a field key in the DND.  Fields have permissions
     associated with them, determining who can read and write the
     contents of the field.  The general permission scheme is:
@@ -244,11 +271,23 @@ class DNDField (object):
     T   -- trusted users may perform this operation
     """
     _ptypes = {
-        'all':   'A', 'any':     'A', 'everyone': 'A',
-        'user':  'U', 'owner':   'U', 'self':     'U',
-        'none':  'N', 'nobody':  'N', 'root':     'N',
-        'trust': 'T', 'trusted': 'T', 'admin':    'T',
-        'a': 'A', 'u': 'U', 'n': 'N', 't': 'T'}
+        'all': 'A',
+        'any': 'A',
+        'everyone': 'A',
+        'user': 'U',
+        'owner': 'U',
+        'self': 'U',
+        'none': 'N',
+        'nobody': 'N',
+        'root': 'N',
+        'trust': 'T',
+        'trusted': 'T',
+        'admin': 'T',
+        'a': 'A',
+        'u': 'U',
+        'n': 'N',
+        't': 'T'
+    }
 
     def __init__(self, name, rd, wr):
         """Initialize a new DNDField instance:
@@ -257,15 +296,15 @@ class DNDField (object):
         rd     -- who has read access to the field (str)
         wr     -- who has write access to the field (str)
         """
-        self._name  = name
-        self._read  = self.permtype(rd)
+        self._name = name
+        self._read = self.permtype(rd)
         self._write = self.permtype(wr)
 
-    name = property(lambda self: self._name, doc = "The name of the field")
-    read = property(lambda self: self._read, doc = "Who has read permission")
-    write = property(lambda self: self._write, doc = "Who has write permission")
-    
-    def is_readable(self, bywhom = 'any'):
+    name = property(lambda self: self._name, doc="The name of the field")
+    read = property(lambda self: self._read, doc="Who has read permission")
+    write = property(lambda self: self._write, doc="Who has write permission")
+
+    def is_readable(self, bywhom='any'):
         """Returns True if the field is readable by the specified
         category.  This may either be a string, or a sequence of
         strings; in the latter case, True is returned if at least one
@@ -273,13 +312,13 @@ class DNDField (object):
         not readable, False is returned.
         """
         if isinstance(bywhom, basestring):
-            pt = set((self.permtype(bywhom),))
+            pt = set((self.permtype(bywhom), ))
         else:
             pt = set(self.permtype(x) for x in bywhom)
 
         return self.read == 'A' or self.read in pt
 
-    def is_writable(self, bywhom = 'user'):
+    def is_writable(self, bywhom='user'):
         """Returns True if the field is writable by the specified
         category.  This may either be a string, or a sequence of
         strings; in the latter case, True is returned if at least one
@@ -287,12 +326,12 @@ class DNDField (object):
         not writable, False is returned.
         """
         if isinstance(bywhom, basestring):
-            pt = set((self.permtype(bywhom),))
+            pt = set((self.permtype(bywhom), ))
         else:
             pt = set(self.permtype(x) for x in bywhom)
 
         return self.write == 'A' or self.write in pt
-    
+
     @staticmethod
     def permtype(key):
         """Map a string describing a category of permissions to the
@@ -321,63 +360,71 @@ class DNDField (object):
     def __hash__(self):
         return hash(self._name.lower())
 
+
 # }}
 
 # {{ class DNDRecord
 
-class DNDRecord (dict):
+
+class DNDRecord(dict):
     """This class represents a record in the DND.  It inherits from a
     dictionary, so you can use ordinary dictionary methods, but string
     keys are case-insensitive, and each key can be accessed as if it
     were an attribute as well, provided it is syntactically legal to
     do so (e.g., a field named "class" would not work).
     """
-    def __init__(self, session, query, pw = None):
+
+    def __init__(self, session, query, pw=None):
         self._session = weakref.ref(session)
         self._query = query
         self._pass = pw
 
     def __hash__(self):
         return hash(tuple(self.items()))
-    
+
     def __getitem__(self, key):
         return super(DNDRecord, self).__getitem__(key.lower())
-    
+
     def __setitem__(self, key, val):
         super(DNDRecord, self).__setitem__(key.lower(), val)
 
     def __contains__(self, key):
         return super(DNDRecord, self).__contains__(key.lower())
-    
+
     def __getattr__(self, name):
         try:
             return self[name]
         except KeyError:
             raise AttributeError("no such key: %s" % name)
 
+
 # }}
 
 # {{ class RecordSet
 
-class RecordSet (set):
+
+class RecordSet(set):
     """Abstraction of a set of records.  Basically, this is a set
     but it has a '.more' attribute that is set so that the user can
     tell whether the query from which this record set was generated
     had additional records that were not returned by the server.
     """
-    def __init__(self, itms = ()):
+
+    def __init__(self, itms=()):
         super(RecordSet, self).__init__(itms)
         self.more = False
+
 
 # }}
 
 # {{ class DNDSession
 
-class DNDSession (object):
+
+class DNDSession(object):
     """This class represents an open session with a DND server.
     """
-    TRUST = ('TRUST',)  ## Magic token to indicated trust
-    
+    TRUST = ('TRUST', )  ## Magic token to indicated trust
+
     def __init__(self, **config):
         """Connect to the DND.  If the server and port are not
         specified, the hostname defaults to 'dnd' in the local domain,
@@ -391,18 +438,18 @@ class DNDSession (object):
         debug          -- if true, diagnostics are written to stderr.
         default_fields -- a sequence of field keys for dict lookups.
         """
-        server        = config.get('server')
+        server = config.get('server')
         if server is None:
             server = os.getenv('DNDHOST', 'dnd')
-        
-        port          = config.get('port', 902)
-        self._dfields = config.get('default_fields', ())
-        self._debug   = config.get('debug', False)
 
-        self._fcache  = None  # Cache of DNDField records
-        self._saddr   = None  # Remote server (addr, port)
-        self._conn    = None  # The socket object
-        self._input   = None  # File stream associated with _conn
+        port = config.get('port', 902)
+        self._dfields = config.get('default_fields', ())
+        self._debug = config.get('debug', False)
+
+        self._fcache = None  # Cache of DNDField records
+        self._saddr = None  # Remote server (addr, port)
+        self._conn = None  # The socket object
+        self._input = None  # File stream associated with _conn
 
         try:
             self._conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -423,13 +470,13 @@ class DNDSession (object):
             return base + ' connected to %s port %s>' % self._saddr
         else:
             return base + ' disconnected>'
-    
+
     def is_connected(self):
         """Returns True if the session is currently connected; False
         otherwise.
         """
         return self._conn is not None
-    
+
     def close(self):
         """Send the QUIT command to the DND server, and close the session.
         """
@@ -445,7 +492,7 @@ class DNDSession (object):
                 self._close()
         else:
             raise DNDNotConnected("session is not connected")
-    
+
     def _close(self):
         """Low-level close method; shuts down the socket and fixes up
         the internal state variables.
@@ -455,11 +502,11 @@ class DNDSession (object):
         except (socket.error, DNDError):
             pass
 
-        self._conn  = None
+        self._conn = None
         self._input = None
         self._saddr = None
-    
-    def fieldinfo(self, force = False):
+
+    def fieldinfo(self, force=False):
         """Retrieve the set of fields available on the DND.  The
         result is cached the first time it is looked up, so that
         subsequent calls will return the stored value.
@@ -483,13 +530,13 @@ class DNDSession (object):
 
         return self._fcache
 
-    def fieldnames(self, force = False):
+    def fieldnames(self, force=False):
         """Retrieve the set of field names available on the DND.  This
         is just a wrapper around .fieldinfo(), so the meaning of the
         force parameter and the caching semantics are the same.
         """
         return set(f.name for f in self.fieldinfo(force))
-    
+
     def field(self, name):
         """Return the information for a single field."""
 
@@ -501,31 +548,31 @@ class DNDSession (object):
 
     def set_default_fields(self, *names):
         for elt in names:
-            self.field(elt) # if this succeeds, we're happy
+            self.field(elt)  # if this succeeds, we're happy
 
         self._dfields = names
-    
+
     def readable_fields(self, bywhom='any'):
         """Return a set of the field names available on the DND which
         are readable by the specified category.
         """
-        return set(elt.name for elt in self.fieldinfo() if
-                   elt.is_readable(bywhom))
-    
+        return set(
+            elt.name for elt in self.fieldinfo() if elt.is_readable(bywhom))
+
     def writable_fields(self, bywhom='user'):
         """Return a set of the field names available on the DND which
         are writable by the specified category.
         """
-        return set(elt.name for elt in self.fieldinfo() if
-                   elt.is_writable(bywhom))
-    
+        return set(
+            elt.name for elt in self.fieldinfo() if elt.is_writable(bywhom))
+
     def keep_alive(self):
         """Send a NOOP command to the DND.  This prevents an idle
         session from being disconnected, but has no other effect.
         """
         self._cmd0("NOOP")
         self._expect(200)
-    
+
     def lookup(self, query, *fields):
         """Look up the specified key in the DND.  If no query fields
         are specified, default query fields are used, if available.
@@ -536,7 +583,7 @@ class DNDSession (object):
             return self._lookup(query, *self._dfields)
         else:
             return self._lookup(query, *fields)
-    
+
     def _lookup(self, query, *fields):
         """This is the back end for all query operations.  If fields
         is empty, the number of matching records is returned (if any);
@@ -550,7 +597,7 @@ class DNDSession (object):
         """
         if not check_query_key(query):
             raise DNDError('incorrectly formed query string: %s' % query)
-        
+
         self._cmdq('LOOKUP', query, fields)
         key, data = self._expect(101)
 
@@ -570,17 +617,17 @@ class DNDSession (object):
             key, data = self._expect(200, 201)
             if key == 201:
                 records.more = True
-            
+
             return records
         else:
             self._expect(200, 201)
             return n_rec
-    
+
     def lookup_unique(self, key, *fields):
         """Like lookup(...), but returns False if more than one match was
         found.  This permits you to easily look up a user for whom you
         want a unique match."""
-        
+
         match = self.lookup(key, *fields)
         try:
             if len(match) == 1:
@@ -588,9 +635,9 @@ class DNDSession (object):
         except TypeError:
             if match == 1:
                 return True
-        
+
         return False
-    
+
     def validate(self, query, pw, *fields):
         """Issues a validation query to the DND server.  If
         successful, a dictionary containing the requested fields is
@@ -606,7 +653,7 @@ class DNDSession (object):
             return self._validate(query, pw, *self._dfields)
         else:
             return self._validate(query, pw, *fields)
-    
+
     def begin_validate(self, query, *fields):
         """Initiates a validation query to the DND server.  If
         successful, a tuple (c, r) is returned.  The value of "c" is
@@ -620,12 +667,12 @@ class DNDSession (object):
         is encrypted and sent; this is the default behaviour.
         """
         return self._begin_val(query, *fields)
-    
+
     def _begin_val(self, query, *fields):
         self._cmdq("VALIDATE", query, fields)
         key, data = self._expect(300)
-        
-        def respond(pw, enc = False):
+
+        def respond(pw, enc=False):
             if pw is DNDSession.TRUST:
                 self._cmd0('TRUST')
             else:
@@ -633,25 +680,25 @@ class DNDSession (object):
                     self._cmd1('PASE', pw)
                 else:
                     self._cmd1('PASE', encrypt_challenge(data, pw))
-            
+
             key, val = self._expect(101)
-            
+
             ignore, n_fld = val.split(' ', 2)
             output = DNDRecord(self, query, pw)
             for fld in xrange(int(n_fld)):
                 key, val = self._expect(110)
-                
+
                 output[fields[fld]] = val
-            
+
             self._expect(200)
             return (len(fields) == 0 and True) or output
-        
+
         return data, respond
-    
+
     def _validate(self, query, pw, *fields):
         data, respond = self._begin_val(query, *fields)
         return respond(pw)
-    
+
     def enable_privs(self, query, pw):
         """Enable administrative privileges for this connexion.  Requires
         that the specified user have the AUTH, DBA, or TRUST permission in
@@ -663,12 +710,12 @@ class DNDSession (object):
         """
         if not check_query(query):
             raise DNDError('incorrectly formed query string: %s' % query)
-        
+
         self._cmd1('PRIV', query)
         key, data = self._expect(300)
         self._cmd1('PASE', encrypt_challenge(data, pw))
         self._expect(200)
-    
+
     def disable_privs(self):
         """Disable administrative privileges for this connexion."""
         self._cmd0('UNPRIV')
@@ -683,34 +730,34 @@ class DNDSession (object):
         """
         if not isinstance(record, dict):
             raise TypeError("new record must be a dictionary")
-        
+
         keys = record.keys()
         self._cmd1('ADD', ' '.join(keys))
         self._expect(300)
-        
+
         for key in keys:
             self._cmd0(record[key])
 
         self._expect(200)
-    
+
     def change_record(self, user, pw, *fields):
         """Change one or more field values.  Each field value must be given
         as a tuple of (field-name, new-value), each value in a string.  The
         user given must have permission to change each field, or an error
         will result."""
-        
+
         query = ""
         for q in fields:
             if type(q) <> tuple or len(q) <> 2:
                 raise ValueError("Field changes must be of the form "
                                  "(field, value)")
-            
+
             k = q[0] + " " + enquote_string(q[1])
             query += " " + k
-        
+
         if not query:
             raise ValueError("You must specify at least one field to change.")
-        
+
         self._cmd2("CHANGE", user, query[1:])
         key, data = self._expect(300)
 
@@ -718,15 +765,15 @@ class DNDSession (object):
             self._cmd0("TRUST")
         else:
             self._cmd1("PASE", encrypt_challenge(data, pw))
-        
+
         key, data = self._expect(200)
         return key
-    
+
     def group_list(self, group, pw, *fields):
         """For each user in the specified group, return a record of the given
         fields.  If no fields are specified, only the number of matching users
         is returned."""
-        
+
         self._cmdq("GROUP", group, fields)
         key, data = self._expect(300)
 
@@ -734,59 +781,60 @@ class DNDSession (object):
             self._cmd0("TRUST")
         else:
             self._cmd1("PASE", encrypt_challenge(data, pw))
-        
+
         key, data = self._expect(200, 110)
-        
+
         matches = []
         while key == 110:
             matches.append(data)
 
             key, data = self._expect(200, 110)
-        
+
         if len(fields) == 0:
             return len(matches)
-        
+
         num_recs = len(matches) / len(fields)
-        out = RecordSet(); pos = 0
+        out = RecordSet()
+        pos = 0
         for rec in xrange(num_recs):
             item = DNDRecord(self, group)
-            
+
             for fld in xrange(len(fields)):
                 item[fields[fld]] = matches[pos]
                 pos += 1
-            
+
             out.add(item)
-        
+
         return out
-    
+
     def group_add(self, user, group, pw):
         """Add the specified user to the specified group."""
-        
+
         self._cmd2("GROUPADD", user, group)
         key, data = self._expect(300)
-        
+
         if pw is DNDSession.TRUST:
             self._cmd0("TRUST")
         else:
             self._cmd1("PASE", encrypt_challenge(data, pw))
-        
+
         key, data = self._expect(200)
         return key
-    
+
     def group_remove(self, user, group, pw):
         """Remove the specified user from the specified group."""
-        
+
         self._cmd2("GROUPDEL", user, group)
         key, data = self._expect(300)
-        
+
         if pw is DNDSession.TRUST:
             self._cmd0("TRUST")
         else:
             self._cmd1("PASE", encrypt_challenge(data, pw))
-        
+
         key, data = self._expect(200)
         return key
-    
+
     def change_pw(self, who, old, new):
         """Change the password for the specified user, given the user
         name, old password, and new password.  Returns True if this
@@ -795,16 +843,16 @@ class DNDSession (object):
         old_with_new, new_with_old = encrypt_change(old, new)
         self._cmd3("CHPW", who, old_with_new, new_with_old)
         self._expect(200)
-        
+
         return True
-    
+
     def hostname(self):
         """Return the hostname of the DND server."""
         if not self.is_connected():
             raise DNDNotConnected("session is not connected")
 
         return socket.gethostbyaddr(self._saddr[0])[0]
-    
+
     def _diag(self, msg, *args):
         if self._debug:
             sys.stderr.write(msg % args)
@@ -842,7 +890,7 @@ class DNDSession (object):
     def __getitem__(self, query):
         """self[other] is equivalent to self.lookup_unique(other)"""
         return self.lookup_unique(query)
-    
+
     def _readline(self):
         """[private] Read and parse a response line from the DND.
         Returns a tuple of (code, data), or raises an exception.
@@ -864,31 +912,32 @@ class DNDSession (object):
 
         # Careful not to strip before splitting, as some fields are empty
         key, data = line.split(' ', 1)
-        key = int(key) ; data = data.rstrip()
+        key = int(key)
+        data = data.rstrip()
         self._diag('>> [%03d] %s\n', key, data)
-        
+
         return key, data
-    
+
     def _cmd0(self, cmd):
         msg = cmd + "\n"
         self._diag('<< %s', msg)
         self._rawsend(msg)
-    
+
     def _cmd1(self, cmd, arg):
         msg = cmd + " " + arg + "\n"
         self._diag('<< %s', msg)
         self._rawsend(msg)
-    
+
     def _cmd2(self, cmd, arg1, arg2):
         msg = cmd + " " + arg1 + "," + arg2 + "\n"
         self._diag('<< %s', msg)
         self._rawsend(msg)
-    
+
     def _cmd3(self, cmd, arg1, arg2, arg3):
         msg = cmd + " " + ','.join((arg1, arg2, arg3)) + "\n"
         self._diag('<< %s', msg)
         self._rawsend(msg)
-    
+
     def _cmdq(self, cmd, key, qargs):
         msg = '%s %s' % (cmd, key)
         if qargs:
@@ -898,10 +947,10 @@ class DNDSession (object):
         msg += '\n'
         self._diag('<< %s', msg)
         self._rawsend(msg)
-    
+
     def _expect(self, *wanted):
         out = key, data = self._readline()
-        
+
         if key not in wanted:
             raise DNDProtocolError(key, data)
         else:
@@ -916,7 +965,7 @@ class DNDSession (object):
             self.close()
         except:
             pass
-    
+
     def __del__(self):
         """Insures that the .close() method is called when the object
         is reclaimed by the memory management system.  Exceptions that
@@ -926,34 +975,49 @@ class DNDSession (object):
             self._diag('[disposing of %s]\n', self)
             self.close()
         except:
-            pass    
+            pass
+
 
 # }}
 
-_tvar_re = re.compile(r'%([<>]?=?\d+)?\((#?\w+)'
-                      r'([?/](?:[^\\()]|\\[\\()])+)?\)',
-                      re.DOTALL)
+_tvar_re = re.compile(
+    r'%([<>]?=?\d+)?\((#?\w+)'
+    r'([?/](?:[^\\()]|\\[\\()])+)?\)', re.DOTALL)
 
 # {{ get_format_fields(s)
+
 
 def get_format_fields(s):
     """Return a set of the names of all the query fields specified in
     the given format string.
     """
     tvar = re.compile(r'%\((\w+)\)')
-    out  = set(m.group(1) for m in tvar.finditer(s))
+    out = set(m.group(1) for m in tvar.finditer(s))
 
     return out
 
+
 # }}
 
-__all__ = ('DNDSession', 'RecordSet', 'DNDRecord', 'DNDField',
-           'DNDError', 'DNDProtocolError', 'DNDLostConnection',
-           'DNDNotConnected',
-           'lookup', 'lookup_unique',
-           'enquote_string', 'dequote_string', 'encode_octal',
-           'decode_octal', 'encrypt_challenge', 'encrypt_change',
-           'check_query_key', 'get_format_fields', 
-           )
+__all__ = (
+    'DNDSession',
+    'RecordSet',
+    'DNDRecord',
+    'DNDField',
+    'DNDError',
+    'DNDProtocolError',
+    'DNDLostConnection',
+    'DNDNotConnected',
+    'lookup',
+    'lookup_unique',
+    'enquote_string',
+    'dequote_string',
+    'encode_octal',
+    'decode_octal',
+    'encrypt_challenge',
+    'encrypt_change',
+    'check_query_key',
+    'get_format_fields',
+)
 
 # Here there be dragons

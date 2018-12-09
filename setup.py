@@ -35,4 +35,3 @@ may be of interest to developers at those sites that do use BlitzMail.
                  'scrapeclass'])
 
 # Here there be dragons
-      

@@ -10,7 +10,8 @@ import dnd, errno, inspect, random, socket, sys, thread, unittest
 
 # {{ class PseudoDND
 
-class PseudoDND (object):
+
+class PseudoDND(object):
     """Simulates a primitive DND server for testing purposes.  Only
     one client at a time can be handled.  To customize the behaviour
     of this object for different tests, each client command is given
@@ -24,6 +25,7 @@ class PseudoDND (object):
     which sends a default response to the client.  Your method may
     call .h_default() explicitly if desired for the default behaviour.
     """
+
     def __init__(self, port):
         """Creates a new PseudoDND listening at the specified port.
 
@@ -34,9 +36,9 @@ class PseudoDND (object):
         self._conn.bind(('localhost', port))
         self._conn.listen(1)
         self._client = None
-        self._input  = None
-        self._caddr  = None
-        self._debug  = True
+        self._input = None
+        self._caddr = None
+        self._debug = True
 
     def run(self):
         """Accept a single client session and process its commands.
@@ -45,8 +47,8 @@ class PseudoDND (object):
         _more attribute of this object to a false value.
         """
         self._client = self._conn.accept()[0]
-        self._caddr  = self._client.getpeername()
-        self._input  = self._client.makefile()
+        self._caddr = self._client.getpeername()
+        self._input = self._client.makefile()
         self._diag('- client connected: %s', self._caddr)
 
         self._writelines(220, 'DND server here.')
@@ -57,9 +59,9 @@ class PseudoDND (object):
             except ValueError, e:
                 self._diag('- error: %s', e)
                 break
-            
+
             self._diag('  >> %s %s', cmd, data)
-            
+
             tag = 'h_%s' % cmd.upper()
             handler = getattr(self, tag, None)
             try:
@@ -71,20 +73,20 @@ class PseudoDND (object):
             except ValueError, e:
                 self._diag('- error: %s', e)
                 break
-        
+
         self._diag('- server loop ended')
         self._cclient()
         self._diag('- client disconnected')
-    
+
     def h_QUIT(self, cmd, data):
         """Default QUIT command handler; say OK and stop the client loop."""
         self._writelines(200, 'Ok')
-        self._more = False # Tell server loop to exit
+        self._more = False  # Tell server loop to exit
 
     def h_NOOP(self, cmd, data):
         """Default NOOP command handler; just say OK."""
         self._writelines(200, 'Ok')
-    
+
     def h_default(self, cmd, data):
         """Default command handler; report a syntax error."""
         self._writelines(500, 'Syntax error, command unknown.')
@@ -95,11 +97,11 @@ class PseudoDND (object):
             self._close()
         except:
             pass
-    
+
     def _diag(self, msg, *args):
         if self._debug:
             print >> sys.stderr, msg % args
-    
+
     def _cclient(self):
         try:
             self._client.shutdown(2)
@@ -107,9 +109,9 @@ class PseudoDND (object):
             pass
 
         self._client = None
-        self._caddr  = None
-        self._input  = None
-    
+        self._caddr = None
+        self._input = None
+
     def _close(self):
         self._cclient()
         try:
@@ -117,7 +119,7 @@ class PseudoDND (object):
         except (socket.error, AttributeError):
             pass
 
-        self._conn   = None
+        self._conn = None
 
     def _readline(self):
         try:
@@ -139,7 +141,7 @@ class PseudoDND (object):
         if len(out) == 1:
             out.append('')
         return out
-    
+
     def _rawsend(self, data):
         try:
             self._client.send(data)
@@ -160,17 +162,19 @@ class PseudoDND (object):
                 msg = '%03d %s\n' % (code, elt)
                 self._rawsend(msg)
 
+
 # }}
 
 fake_fields = set()
 for wr in 'AUNT':
     for rd in 'AUNT':
-        fake_fields.add(dnd.DNDField('field%d' % (len(fake_fields) + 1),
-                                     rd, wr))
+        fake_fields.add(
+            dnd.DNDField('field%d' % (len(fake_fields) + 1), rd, wr))
 
 # {{ class TestDND
 
-class TestDND (PseudoDND):
+
+class TestDND(PseudoDND):
     def __init__(self, *args):
         super(TestDND, self).__init__(*args)
 
@@ -184,21 +188,20 @@ class TestDND (PseudoDND):
         self._writelines(502, 'Bad sequence of commands')
         self._vdata = None
         return False
-    
+
     def h_FIELDS(self, cmd, data):
         if not self.check_validate():
             return
-        
+
         self._writelines(102, '%d' % len(fake_fields))
         for fld in fake_fields:
-            self._writelines(120, '%s %s %s' % (
-                fld.name, fld.write, fld.read))
+            self._writelines(120, '%s %s %s' % (fld.name, fld.write, fld.read))
         self._writelines(200, 'Done')
 
     def h_UNPRIV(self, cmd, data):
         if not self.check_validate():
             return
-        
+
         self._writelines(200, 'Permissions removed')
         self._privs = None
 
@@ -212,7 +215,7 @@ class TestDND (PseudoDND):
         else:
             query, data = data.split(',', 1)
             fields = data.split(' ')
-        
+
         if query == 'missing':
             self._writelines(520, 'No match for that name.')
             return
@@ -222,7 +225,7 @@ class TestDND (PseudoDND):
             numrec = 30
         else:
             numrec = 2
-        
+
         for fld in fields:
             for elt in fake_fields:
                 if elt == fld:
@@ -239,13 +242,13 @@ class TestDND (PseudoDND):
         self._writelines(101, '%d %d' % (outrec, len(fields)))
         for i in xrange(outrec):
             for j in xrange(len(fields)):
-                self._writelines(110, 'Data for user %s %s' % (
-                    i + 1, fields[j]))
+                self._writelines(110,
+                                 'Data for user %s %s' % (i + 1, fields[j]))
         if outrec < numrec:
             self._writelines(201, 'Additional matching records not returned.')
         else:
             self._writelines(200, 'Ok.')
-    
+
     def h_VALIDATE(self, cmd, data):
         if not self.check_validate():
             return
@@ -263,7 +266,7 @@ class TestDND (PseudoDND):
         elif name in ('ambiguous', 'excessive'):
             self._writelines(522, 'Ambiguous name.')
             return
-        
+
         for fld in fields:
             for elt in fake_fields:
                 if elt == fld:
@@ -275,10 +278,13 @@ class TestDND (PseudoDND):
             if not elt.is_readable(('user', 'any')):
                 self._writelines(521, 'Field access denied: %s' % fld)
                 return
-        
-        self._vdata = {'name': name, 'fields': fields,
-                       'pw': 'testpass',
-                       'challenge': '240147326165005023201134'}
+
+        self._vdata = {
+            'name': name,
+            'fields': fields,
+            'pw': 'testpass',
+            'challenge': '240147326165005023201134'
+        }
         self._writelines(300, self._vdata['challenge'])
 
     def h_PASS(self, cmd, data):
@@ -300,7 +306,7 @@ class TestDND (PseudoDND):
         if self._vdata is None:
             self._writelines(502, 'Bad sequence of commands')
             return
-        
+
         enc = dnd.encrypt_challenge(self._vdata['challenge'],
                                     self._vdata['pw'])
         if enc <> data:
@@ -310,14 +316,16 @@ class TestDND (PseudoDND):
             for elt in self._vdata['fields']:
                 self._writelines(110, 'Data for %s' % elt)
             self._writelines(200, 'Validation ok.')
-        
+
         self._vdata = None
+
 
 # }}
 
 # {{ class DNDSessionSmokeTest
 
-class DNDSessionSmokeTest (unittest.TestCase):
+
+class DNDSessionSmokeTest(unittest.TestCase):
     """A test case that verifies that some basic functionality of the
     DNDSession object works properly.  Tested here are:
 
@@ -332,17 +340,17 @@ class DNDSessionSmokeTest (unittest.TestCase):
 
     There are many other methods that are NOT tested here.
     """
-    host_name  = 'localhost'
-    host_port  = random.randint(2000, 50000)
-    
+    host_name = 'localhost'
+    host_port = random.randint(2000, 50000)
+
     def __init__(self, *args, **kwargs):
         super(DNDSessionSmokeTest, self).__init__(*args, **kwargs)
-    
+
     def setUp(self):
-        self._pd = TestDND(self.host_port)        
+        self._pd = TestDND(self.host_port)
         thread.start_new_thread(self.run_pseudo, ())
         self._dnd = None
-    
+
     def run_pseudo(self):
         self._pd.run()
         thread.exit()
@@ -352,11 +360,11 @@ class DNDSessionSmokeTest (unittest.TestCase):
             self._dnd.close()
 
         self._pd._close()
-    
+
     def runTest(self):
         try:
-            self._dnd = dnd.DNDSession(server = self.host_name,
-                                       port = self.host_port)
+            self._dnd = dnd.DNDSession(
+                server=self.host_name, port=self.host_port)
             d = self._dnd
         except dnd.DNDError, e:
             self.fail('unable to create test DNDSession: %s' % e)
@@ -366,15 +374,15 @@ class DNDSessionSmokeTest (unittest.TestCase):
             fld = d.fieldinfo()
         except dnd.DNDError, e:
             self.fail('error in fieldinfo: %s' % e)
-        
+
         self.assertEquals(len(fld), 16)
-        
+
         # Make sure they're the same as the ones we sent out, modulo
         # case sensitivity
         fld = set(s.upper() for s in d.fieldnames())
         cmp = set(s.name.upper() for s in fake_fields)
         self.assertEquals(fld, cmp)
-        
+
         # Make sure the permission wrangling looks reasonable...
         fld = d.readable_fields('any')
         self.assertEquals(len(fld), 4)
@@ -410,7 +418,7 @@ class DNDSessionSmokeTest (unittest.TestCase):
             rec = d.lookup('unique', 'field1', 'field13', 'field9')
         except dnd.DNDError, e:
             self.fail('error in lookup: %s' % e)
-        
+
         self.assertEquals(len(rec), 1)
         self.assertFalse(rec.more)
         elt = rec.pop()
@@ -443,7 +451,7 @@ class DNDSessionSmokeTest (unittest.TestCase):
             self.assertTrue(rec)
         except dnd.DNDError, e:
             self.fail('error in validate responder: %s' % e)
-        
+
         try:
             d.begin_validate('missing')
             self.fail('missing user did not generate DNDProtocolError')
@@ -489,10 +497,11 @@ class DNDSessionSmokeTest (unittest.TestCase):
         except dnd.DNDError, e:
             self.fail('error in keep_alive: %s' % e)
 
+
 # }}
 
 if __name__ == "__main__":
-    suite = unittest.TestSuite((DNDSessionSmokeTest(),))
+    suite = unittest.TestSuite((DNDSessionSmokeTest(), ))
 
     unittest.main()
 

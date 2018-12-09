@@ -25,6 +25,10 @@ clean:
 install: distclean
 	python setup.py install
 
+# Requires https://github.com/google/yapf (pip install yapf).
+format:
+	yapf --style=pep8 -i *.py
+
 distclean: clean
 	rm -f dnd.zip
 	if [ -d build ] ; then rm -rf build ; fi

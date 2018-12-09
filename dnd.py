@@ -42,8 +42,6 @@ uid_query_re = re.compile(r'#\d+$')
 # A regex matching a legal DCTSNUM field query (Dartmouth only)
 dcts_query_re = re.compile(r'\*(?:hd)?\d{5}[A-Z]$', re.IGNORECASE)
 
-# {{ check_query_key(q)
-
 
 def check_query_key(q):
     """Check whether the given query key q is valid as a DND query.
@@ -52,11 +50,6 @@ def check_query_key(q):
     return name_query_re.match(q) is not None or \
            uid_query_re.match(q) is not None  or \
            dcts_query_re.match(q) is not None
-
-
-# }}
-
-# {{ encrypt_challenge(rnd, key)
 
 
 def encrypt_challenge(rnd, key):
@@ -79,11 +72,6 @@ def encrypt_challenge(rnd, key):
     del (dkey)
 
     return encode_octal(result)
-
-
-# }}
-
-# {{ encrypt_change(old, new)
 
 
 def encrypt_change(old, new):
@@ -115,22 +103,12 @@ def encrypt_change(old, new):
     return (encode_octal(old_w_new), encode_octal(new_w_old))
 
 
-# }}
-
-# {{ encode_octal(s)
-
-
 def encode_octal(s):
     """Encode the characters of an ASCII string as octal digits.  Each
     character is represented by a sequence of 3 consecutive octal
     digits representing its ASCII value.
     """
     return ''.join("%03o" % ord(v) for v in s)
-
-
-# }}
-
-# {{ decode_octal(s)
 
 
 def decode_octal(s):
@@ -146,22 +124,12 @@ def decode_octal(s):
         chr(int(x, 8)) for x in (s[x:x + 3] for x in xrange(0, len(s), 3)))
 
 
-# }}
-
-# {{ enquote_string(s)
-
-
 def enquote_string(s):
     """Enquotes a value according to the DND protocol rules.  All
     interior quotation marks are doubled, and the resulting string is
     enclosed in double quotations.
     """
     return '"' + s.replace('"', '""') + '"'
-
-
-# }}
-
-# {{ dequote_string(s)
 
 
 def dequote_string(s):
@@ -177,11 +145,6 @@ def dequote_string(s):
         s = s[:-1]
 
     return s.replace('""', '"')
-
-
-# }}
-
-# {{ lookup(...)
 
 
 def lookup(query, fields=(), **config):
@@ -201,11 +164,6 @@ def lookup(query, fields=(), **config):
         d.close()
 
 
-# }}
-
-# {{ lookup_unique(...)
-
-
 def lookup_unique(query, fields=(), **config):
     """This is a wrapper function that creates a DNDSession object and
     uses it to issue the specified query.
@@ -221,11 +179,6 @@ def lookup_unique(query, fields=(), **config):
         return d.lookup_unique(query, *fields)
     finally:
         d.close()
-
-
-# }}
-
-# {{ class DNDError and subclasses
 
 
 class DNDError(Exception):
@@ -253,11 +206,6 @@ class DNDLostConnection(DNDError):
 
 class DNDNotConnected(DNDError):
     pass
-
-
-# }}
-
-# {{ class DNDField
 
 
 class DNDField(object):
@@ -361,11 +309,6 @@ class DNDField(object):
         return hash(self._name.lower())
 
 
-# }}
-
-# {{ class DNDRecord
-
-
 class DNDRecord(dict):
     """This class represents a record in the DND.  It inherits from a
     dictionary, so you can use ordinary dictionary methods, but string
@@ -398,11 +341,6 @@ class DNDRecord(dict):
             raise AttributeError("no such key: %s" % name)
 
 
-# }}
-
-# {{ class RecordSet
-
-
 class RecordSet(set):
     """Abstraction of a set of records.  Basically, this is a set
     but it has a '.more' attribute that is set so that the user can
@@ -413,11 +351,6 @@ class RecordSet(set):
     def __init__(self, itms=()):
         super(RecordSet, self).__init__(itms)
         self.more = False
-
-
-# }}
-
-# {{ class DNDSession
 
 
 class DNDSession(object):
@@ -978,13 +911,9 @@ class DNDSession(object):
             pass
 
 
-# }}
-
 _tvar_re = re.compile(
     r'%([<>]?=?\d+)?\((#?\w+)'
     r'([?/](?:[^\\()]|\\[\\()])+)?\)', re.DOTALL)
-
-# {{ get_format_fields(s)
 
 
 def get_format_fields(s):
@@ -996,8 +925,6 @@ def get_format_fields(s):
 
     return out
 
-
-# }}
 
 __all__ = (
     'DNDSession',

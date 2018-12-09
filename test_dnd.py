@@ -8,8 +8,6 @@
 
 import dnd, errno, inspect, random, socket, sys, thread, unittest
 
-# {{ class PseudoDND
-
 
 class PseudoDND(object):
     """Simulates a primitive DND server for testing purposes.  Only
@@ -163,15 +161,11 @@ class PseudoDND(object):
                 self._rawsend(msg)
 
 
-# }}
-
 fake_fields = set()
 for wr in 'AUNT':
     for rd in 'AUNT':
         fake_fields.add(
             dnd.DNDField('field%d' % (len(fake_fields) + 1), rd, wr))
-
-# {{ class TestDND
 
 
 class TestDND(PseudoDND):
@@ -318,11 +312,6 @@ class TestDND(PseudoDND):
             self._writelines(200, 'Validation ok.')
 
         self._vdata = None
-
-
-# }}
-
-# {{ class DNDSessionSmokeTest
 
 
 class DNDSessionSmokeTest(unittest.TestCase):
@@ -497,8 +486,6 @@ class DNDSessionSmokeTest(unittest.TestCase):
         except dnd.DNDError, e:
             self.fail('error in keep_alive: %s' % e)
 
-
-# }}
 
 if __name__ == "__main__":
     suite = unittest.TestSuite((DNDSessionSmokeTest(), ))

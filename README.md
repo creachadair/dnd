@@ -1,5 +1,9 @@
 # Dartmouth Name Directory Client
 
+* N.B.: The Dartmouth Name Directory and the systems it served have been
+  decommissioned, so the code here is primarily of historical interest.  Some
+  of the links below are broken.
+
 Copyright (C) 2004-2007 Michael J. Fromberger, All Rights Reserved.
 
 The file "dnd.py" implements a client for the Dartmouth Name Directory (DND), a

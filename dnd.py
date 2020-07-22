@@ -117,7 +117,7 @@ def decode_octal(s):
     The input is left-padded with zeroes if the length is not a
     multiple of three.
     """
-    while len(s) % 3 <> 0:
+    while len(s) % 3 != 0:
         s = '0' + s
 
     return ''.join(
@@ -678,7 +678,7 @@ class DNDSession(object):
 
         query = ""
         for q in fields:
-            if type(q) <> tuple or len(q) <> 2:
+            if type(q) != tuple or len(q) != 2:
                 raise ValueError("Field changes must be of the form "
                                  "(field, value)")
 

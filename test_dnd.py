@@ -285,7 +285,7 @@ class TestDND(PseudoDND):
             self._writelines(502, 'Bad sequence of commands')
             return
 
-        if data <> self._vdata['pw']:
+        if data != self._vdata['pw']:
             self._writelines(530, 'Incorrect password.')
         else:
             self._writelines(101, '1 %d' % len(self._vdata['fields']))
@@ -302,7 +302,7 @@ class TestDND(PseudoDND):
 
         enc = dnd.encrypt_challenge(self._vdata['challenge'],
                                     self._vdata['pw'])
-        if enc <> data:
+        if enc != data:
             self._writelines(530, 'Incorrect password.')
         else:
             self._writelines(101, '1 %d' % len(self._vdata['fields']))

@@ -384,7 +384,7 @@ class DNDSession(object):
         try:
             self._conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._conn.connect((server, port))
-        except socket.error, e:
+        except socket.error as e:
             raise DNDError(str(e))
 
         self._saddr = self._conn.getpeername()
@@ -796,7 +796,7 @@ class DNDSession(object):
 
         try:
             self._conn.send(data)
-        except socket.error, e:
+        except socket.error as e:
             if e[0] == errno.EPIPE:
                 self._close()
                 raise DNDLostConnection("broken pipe")
@@ -814,7 +814,7 @@ class DNDSession(object):
 
         try:
             return self._lookup(query) > 0
-        except DNDError, e:
+        except DNDError as e:
             return False
 
     def __getitem__(self, query):
@@ -827,7 +827,7 @@ class DNDSession(object):
         """
         try:
             line = self._input.readline()
-        except socket.error, e:
+        except socket.error as e:
             if e[0] == errno.ECONNRESET:
                 self._close()
                 raise DNDLostConnection("connection closed by remote host")

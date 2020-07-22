@@ -53,7 +53,7 @@ class PseudoDND(object):
         while self._more:
             try:
                 cmd, data = self._readline()
-            except ValueError, e:
+            except ValueError as e:
                 self._diag('- error: %s', e)
                 break
 
@@ -67,7 +67,7 @@ class PseudoDND(object):
                     handler(cmd, data)
                 else:
                     self.h_default(cmd, data)
-            except ValueError, e:
+            except ValueError as e:
                 self._diag('- error: %s', e)
                 break
 
@@ -121,7 +121,7 @@ class PseudoDND(object):
     def _readline(self):
         try:
             line = self._input.readline()
-        except socket.error, e:
+        except socket.error as e:
             if e[0] == errno.ECONNRESET:
                 self._close()
                 raise ValueError("connection closed by remote host")
@@ -142,7 +142,7 @@ class PseudoDND(object):
     def _rawsend(self, data):
         try:
             self._client.send(data)
-        except socket.error, e:
+        except socket.error as e:
             if e[0] == errno.EPIPE:
                 self._close()
                 raise ValueError("broken pipe")
@@ -354,13 +354,13 @@ class DNDSessionSmokeTest(unittest.TestCase):
             self._dnd = dnd.DNDSession(server=self.host_name,
                                        port=self.host_port)
             d = self._dnd
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('unable to create test DNDSession: %s' % e)
 
         # Look up all the field keys
         try:
             fld = d.fieldinfo()
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in fieldinfo: %s' % e)
 
         self.assertEquals(len(fld), 16)
@@ -387,13 +387,13 @@ class DNDSessionSmokeTest(unittest.TestCase):
             self.fail('missing user did not raise DNDProtocolError')
         except dnd.DNDProtocolError:
             pass
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('missing user raised an unexpected error: %s' % e)
 
         # Make sure the 'additional records' message is handled...
         try:
             rec = d.lookup('excessive', 'field1', 'field9')
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in lookup: %s' % e)
 
         self.assertEquals(len(rec), 25)
@@ -404,7 +404,7 @@ class DNDSessionSmokeTest(unittest.TestCase):
         # Make sure a unique user is really unique...
         try:
             rec = d.lookup('unique', 'field1', 'field13', 'field9')
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in lookup: %s' % e)
 
         self.assertEquals(len(rec), 1)
@@ -420,24 +420,24 @@ class DNDSessionSmokeTest(unittest.TestCase):
         # Make sure validation works correctly
         try:
             chal, resp = d.begin_validate('unique', 'field1', 'field2')
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in begin_validate: %s' % e)
 
         try:
             rec = resp('testpass', False)
             self.assertEqual(len(rec), 2)
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in validate responder: %s' % e)
 
         try:
             chal, resp = d.begin_validate('unique')
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in begin_validate: %s' % e)
 
         try:
             rec = resp('testpass', False)
             self.assertTrue(rec)
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in validate responder: %s' % e)
 
         try:
@@ -445,7 +445,7 @@ class DNDSessionSmokeTest(unittest.TestCase):
             self.fail('missing user did not generate DNDProtocolError')
         except dnd.DNDProtocolError:
             pass
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in begin_validate: %s' % e)
 
         try:
@@ -453,7 +453,7 @@ class DNDSessionSmokeTest(unittest.TestCase):
             self.fail('ambiguous user did not generate DNDProtocolError')
         except dnd.DNDProtocolError:
             pass
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in validation: %s' % e)
 
         try:
@@ -461,7 +461,7 @@ class DNDSessionSmokeTest(unittest.TestCase):
             self.fail('wrong password did not generate DNDProtocolError')
         except dnd.DNDProtocolError:
             pass
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in validation: %s' % e)
 
         try:
@@ -469,7 +469,7 @@ class DNDSessionSmokeTest(unittest.TestCase):
             self.fail('unknown field did not generate DNDProtocolError')
         except dnd.DNDProtocolError:
             pass
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in lookup: %s' % e)
 
         try:
@@ -477,12 +477,12 @@ class DNDSessionSmokeTest(unittest.TestCase):
             self.fail('inaccessible field did not generate DNDProtocolError')
         except dnd.DNDProtocolError:
             pass
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in lookup: %s' % e)
 
         try:
             d.keep_alive()
-        except dnd.DNDError, e:
+        except dnd.DNDError as e:
             self.fail('error in keep_alive: %s' % e)
 
 

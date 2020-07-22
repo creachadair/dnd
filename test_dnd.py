@@ -23,7 +23,6 @@ class PseudoDND(object):
     which sends a default response to the client.  Your method may
     call .h_default() explicitly if desired for the default behaviour.
     """
-
     def __init__(self, port):
         """Creates a new PseudoDND listening at the specified port.
 
@@ -352,8 +351,8 @@ class DNDSessionSmokeTest(unittest.TestCase):
 
     def runTest(self):
         try:
-            self._dnd = dnd.DNDSession(
-                server=self.host_name, port=self.host_port)
+            self._dnd = dnd.DNDSession(server=self.host_name,
+                                       port=self.host_port)
             d = self._dnd
         except dnd.DNDError, e:
             self.fail('unable to create test DNDSession: %s' % e)

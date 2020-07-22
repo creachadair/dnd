@@ -191,7 +191,6 @@ class DNDProtocolError(DNDError):
     error code, the `value' field gives the descriptive text returned
     by the server.
     """
-
     def __init__(self, key, value=''):
         self.key = key
         self.value = value
@@ -316,7 +315,6 @@ class DNDRecord(dict):
     were an attribute as well, provided it is syntactically legal to
     do so (e.g., a field named "class" would not work).
     """
-
     def __init__(self, session, query, pw=None):
         self._session = weakref.ref(session)
         self._query = query
@@ -347,7 +345,6 @@ class RecordSet(set):
     tell whether the query from which this record set was generated
     had additional records that were not returned by the server.
     """
-
     def __init__(self, itms=()):
         super(RecordSet, self).__init__(itms)
         self.more = False
@@ -489,15 +486,15 @@ class DNDSession(object):
         """Return a set of the field names available on the DND which
         are readable by the specified category.
         """
-        return set(
-            elt.name for elt in self.fieldinfo() if elt.is_readable(bywhom))
+        return set(elt.name for elt in self.fieldinfo()
+                   if elt.is_readable(bywhom))
 
     def writable_fields(self, bywhom='user'):
         """Return a set of the field names available on the DND which
         are writable by the specified category.
         """
-        return set(
-            elt.name for elt in self.fieldinfo() if elt.is_writable(bywhom))
+        return set(elt.name for elt in self.fieldinfo()
+                   if elt.is_writable(bywhom))
 
     def keep_alive(self):
         """Send a NOOP command to the DND.  This prevents an idle
